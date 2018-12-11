@@ -28,7 +28,7 @@ Resources:
     Properties:
       FunctionName: !Sub 'user-api-read${CustomSuffix}'
       Runtime: nodejs6.10
-      CodeUri: app
+      CodeUri: userapp
       Handler: read.lambda_handler
       Description: View User by name
       Timeout: 10
@@ -50,7 +50,7 @@ Resources:
     Properties:
       FunctionName: !Sub 'user-api-list${CustomSuffix}'
       Runtime: nodejs6.10
-      CodeUri: app
+      CodeUri: userapp
       Handler: list.lambda_handler
       Description: List Users
       Timeout: 10
@@ -72,7 +72,7 @@ Resources:
     Properties:
       FunctionName: !Sub 'user-api-update${CustomSuffix}'
       Runtime: nodejs6.10
-      CodeUri: app
+      CodeUri: userapp
       Handler: update.lambda_handler
       Description: Update User
       Timeout: 10
@@ -94,7 +94,7 @@ Resources:
     Properties:
       FunctionName: !Sub 'user-api-remove${CustomSuffix}'
       Runtime: nodejs6.10
-      CodeUri: app
+      CodeUri: userapp
       Handler: delete.lambda_handler
       Description: Remove User
       Timeout: 10
