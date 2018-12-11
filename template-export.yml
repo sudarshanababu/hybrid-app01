@@ -2,14 +2,57 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Creates a RESTful API using API Gateway, Lambda and DynamoDB for the
   Wild Rydes serverless devops workshop
 Parameters:
-  CustomSuffix:
-    Default: ''
-    Description: Suffix for Lambda functions in custom CodePipeline stages
+  Environment:
+    Default: development
+    Description: The name for a project pipeline stage, such as Staging or Prod, for
+      which resources are provisioned and deployed.
     Type: String
   ProjectId:
     Description: AWS CodeStar projectID used to associate new resources to team members
     Type: String
 Resources:
+  HelloWorld:
+    Properties:
+      CodeUri: s3://sb-serverless-demo-bucket/68a875b370083779551c23c454affd94
+      Environment:
+        Variables:
+          NODE_ENV: production
+      Events:
+        GetEvent:
+          Properties:
+            Method: get
+            Path: /
+          Type: Api
+        PostEvent:
+          Properties:
+            Method: post
+            Path: /
+          Type: Api
+      Handler: index.handler
+      Role:
+        Fn::GetAtt:
+        - LambdaExecutionRole
+        - Arn
+      Runtime: nodejs8.10
+    Type: AWS::Serverless::Function
+  LambdaExecutionRole:
+    Description: Creating service role in IAM for AWS Lambda
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Path: /
+      PermissionsBoundary:
+        Fn::Sub: arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/CodeStar_${ProjectId}_PermissionsBoundary
+      RoleName:
+        Fn::Sub: CodeStar-${ProjectId}-Execution${Environment}
+    Type: AWS::IAM::Role
   ListFunction:
     Properties:
       CodeUri: s3://sb-serverless-demo-bucket/ac67bf2ac98e8632c4a8cfced33d4d91
@@ -25,7 +68,7 @@ Resources:
             Path: /users
           Type: Api
       FunctionName:
-        Fn::Sub: user-api-list${CustomSuffix}
+        Fn::Sub: user-api-list${Environment}
       Handler: list.lambda_handler
       Role:
         Fn::ImportValue:
@@ -52,7 +95,7 @@ Resources:
             Path: /users/{name}
           Type: Api
       FunctionName:
-        Fn::Sub: user-api-read${CustomSuffix}
+        Fn::Sub: user-api-read${Environment}
       Handler: read.lambda_handler
       Role:
         Fn::ImportValue:
@@ -79,7 +122,7 @@ Resources:
             Path: /users/{name}
           Type: Api
       FunctionName:
-        Fn::Sub: user-api-remove${CustomSuffix}
+        Fn::Sub: user-api-remove${Environment}
       Handler: delete.lambda_handler
       Role:
         Fn::ImportValue:
@@ -112,7 +155,7 @@ Resources:
             Path: /users/{name}
           Type: Api
       FunctionName:
-        Fn::Sub: user-api-update${CustomSuffix}
+        Fn::Sub: user-api-update${Environment}
       Handler: update.lambda_handler
       Role:
         Fn::ImportValue:
