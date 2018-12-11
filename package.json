@@ -1,6 +1,6 @@
 {
-    "name": "express-HelloWorld",
-    "description": "Hello World ExpressJS WebService",
+    "name": "Hybrid-User-Api",
+    "description": "Serverless App using code star and Stackery",
     "version": "0.0.1",
     "private": true,
     "dependencies": {

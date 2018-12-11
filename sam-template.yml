@@ -1,0 +1,112 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform:
+- 'AWS::Serverless-2016-10-31'
+- 'AWS::CodeStar'
+
+Description:
+  Creates a RESTful API using API Gateway, Lambda and DynamoDB for the Wild Rydes serverless devops workshop
+
+Parameters:
+  ProjectId:
+    Type: String
+    Description: AWS CodeStar projectID used to associate new resources to team members
+  CustomSuffix:
+    Type: String
+    Description: Suffix for Lambda functions in custom CodePipeline stages
+    Default: ''
+
+Resources:
+  Table:
+    Type: 'AWS::Serverless::SimpleTable'
+    Properties:
+      PrimaryKey:
+         Name: name
+         Type: String
+
+  ReadFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: !Sub 'user-api-read${CustomSuffix}'
+      Runtime: nodejs6.10
+      CodeUri: app
+      Handler: read.lambda_handler
+      Description: View User by name
+      Timeout: 10
+      Events:
+        GET:
+          Type: Api
+          Properties:
+            Path: /users/{name}
+            Method: get
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref Table
+      Role:
+        Fn::ImportValue:
+          !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
+
+  ListFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: !Sub 'user-api-list${CustomSuffix}'
+      Runtime: nodejs6.10
+      CodeUri: app
+      Handler: list.lambda_handler
+      Description: List Users
+      Timeout: 10
+      Events:
+        GET:
+          Type: Api
+          Properties:
+            Path: /users
+            Method: get
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref Table
+      Role:
+        Fn::ImportValue:
+          !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
+
+  UpdateFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: !Sub 'user-api-update${CustomSuffix}'
+      Runtime: nodejs6.10
+      CodeUri: app
+      Handler: update.lambda_handler
+      Description: Update User
+      Timeout: 10
+      Events:
+        PUT:
+          Type: Api
+          Properties:
+            Path: /users/{name}
+            Method: put
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref Table
+      Role:
+        Fn::ImportValue:
+          !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
+
+  RemoveFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: !Sub 'user-api-remove${CustomSuffix}'
+      Runtime: nodejs6.10
+      CodeUri: app
+      Handler: delete.lambda_handler
+      Description: Remove User
+      Timeout: 10
+      Events:
+        DELETE:
+          Type: Api
+          Properties:
+            Path: /users/{name}
+            Method: delete
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref Table
+      Role:
+        Fn::ImportValue:
+          !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
